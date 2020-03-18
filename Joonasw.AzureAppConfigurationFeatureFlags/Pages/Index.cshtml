@@ -1,0 +1,13 @@
+﻿@page
+@model IndexModel
+@{
+    ViewData["Title"] = "Home page";
+}
+
+<div>
+    <h1 class="display-4">Features</h1>
+    <ul>
+        <li>Feature A: <strong>@(Model.FeatureAEnabled ? "Enabled" : "Disabled")</strong></li>
+        <li>Feature B: <strong>@(Model.FeatureBEnabled ? "Enabled" : "Disabled")</strong></li>
+    </ul>
+</div>
