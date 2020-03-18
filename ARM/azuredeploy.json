@@ -5,7 +5,7 @@
   "variables": {
     "appConfigReaderRoleId": "[subscriptionResourceId('Microsoft.Authorization/roleDefinitions', '516239f1-63e1-4d78-a4de-a74fb236a071')]",
     "appConfigName": "[concat('config', uniqueString(resourceGroup().id))]",
-    "appConfigSku": "free", // Can also change to "standard"
+    "appConfigSku": "free",
     "webAppName": "[concat('app', uniqueString(resourceGroup().id))]",
     "appServicePlanName": "[concat('plan', uniqueString(resourceGroup().id))]"
   },
