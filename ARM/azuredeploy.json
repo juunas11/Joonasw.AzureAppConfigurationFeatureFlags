@@ -1,0 +1,82 @@
+{
+  "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+  "contentVersion": "1.0.0.0",
+  "parameters": {},
+  "variables": {
+    "appConfigReaderRoleId": "[subscriptionResourceId('Microsoft.Authorization/roleDefinitions', '516239f1-63e1-4d78-a4de-a74fb236a071')]",
+    "appConfigName": "[concat('config', uniqueString(resourceGroup().id))]",
+    "appConfigSku": "free", // Can also change to "standard"
+    "webAppName": "[concat('app', uniqueString(resourceGroup().id))]",
+    "appServicePlanName": "[concat('plan', uniqueString(resourceGroup().id))]"
+  },
+  "resources": [
+    {
+      "type": "Microsoft.AppConfiguration/configurationStores",
+      "apiVersion": "2019-10-01",
+      "name": "[variables('appConfigName')]",
+      "location": "[resourceGroup().location]",
+      "sku": {
+        "name": "[variables('appConfigSku')]"
+      },
+      "properties": {
+        "encryption": {}
+      }
+    },
+    {
+      "type": "Microsoft.AppConfiguration/configurationStores/providers/roleAssignments",
+      "apiVersion": "2018-09-01-preview",
+      "name": "[concat(variables('appConfigName'), '/Microsoft.Authorization/', guid('AppConfigRoleAssignment'))]",
+      "dependsOn": [
+        "[resourceId('Microsoft.AppConfiguration/configurationStores', variables('appConfigName'))]",
+        "[resourceId('Microsoft.Web/sites', variables('webAppName'))]"
+      ],
+      "properties": {
+        "roleDefinitionId": "[variables('appConfigReaderRoleId')]",
+        "principalId": "[reference(resourceId('Microsoft.Web/sites', variables('webAppName')), '2016-08-01', 'Full').identity.principalId]",
+        "principalType": "ServicePrincipal"
+      }
+    },
+    {
+      "type": "Microsoft.Web/serverfarms",
+      "apiVersion": "2018-02-01",
+      "name": "[variables('appServicePlanName')]",
+      "location": "[resourceGroup().location]",
+      "sku": {
+        "name": "D1",
+        "tier": "Shared",
+        "size": "D1",
+        "family": "D",
+        "capacity": 0
+      },
+      "kind": "app",
+      "properties": {
+      }
+    },
+    {
+      "type": "Microsoft.Web/sites",
+      "apiVersion": "2019-08-01",
+      "name": "[variables('webAppName')]",
+      "location": "[resourceGroup().location]",
+      "dependsOn": [
+        "[resourceId('Microsoft.Web/serverfarms', variables('appServicePlanName'))]"
+      ],
+      "kind": "app",
+      "identity": {
+        "type": "SystemAssigned"
+      },
+      "properties": {
+        "enabled": true,
+        "serverFarmId": "[resourceId('Microsoft.Web/serverfarms', variables('appServicePlanName'))]",
+        "siteConfig": {
+          "appSettings": [
+            {
+              "name": "App__AppConfigEndpoint",
+              "value": "[concat('https://', variables('appConfigName'), '.azconfig.io')]"
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "outputs": {}
+}
