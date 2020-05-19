@@ -15,3 +15,15 @@ variables:
 steps:
 - script: dotnet publish -c $(buildConfiguration) -o ./publish
   displayName: 'dotnet publish'
+
+- task: AzureResourceManagerTemplateDeployment@3
+  inputs:
+    deploymentScope: 'Resource Group'
+    azureResourceManagerConnection: $(resourceManagerConnectionName)
+    subscriptionId: $(azureSubscriptionId)
+    action: 'Create Or Update Resource Group'
+    resourceGroupName: $(resourceGroupName)
+    location: $(resourceLocation)
+    templateLocation: 'Linked artifact'
+    csmFile: './ARM/azuredeploy.json'
+    deploymentMode: 'Incremental'
