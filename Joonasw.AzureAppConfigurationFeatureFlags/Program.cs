@@ -19,15 +19,17 @@ namespace Joonasw.AzureAppConfigurationFeatureFlags
                 {
                     webBuilder.ConfigureAppConfiguration((hostingContext, configBuilder) =>
                     {
-                        var config = configBuilder.Build();
-                        var appSettings = config.GetSection("App").Get<AppSettings>();
+                        IConfiguration config = configBuilder.Build();
+                        AppSettings appSettings = config.GetSection("App").Get<AppSettings>();
                         configBuilder.AddAzureAppConfiguration(o =>
                         {
                             var credentialOptions = new DefaultAzureCredentialOptions();
-                            if (!string.IsNullOrEmpty(appSettings.SharedTokenCacheTenantId))
+                            if (!string.IsNullOrEmpty(appSettings.LocalEnvironmentTenantId))
                             {
                                 // AAD tenant id to use in local environment
-                                credentialOptions.SharedTokenCacheTenantId = appSettings.SharedTokenCacheTenantId;
+                                credentialOptions.SharedTokenCacheTenantId = appSettings.LocalEnvironmentTenantId;
+                                credentialOptions.VisualStudioCodeTenantId = appSettings.LocalEnvironmentTenantId;
+                                credentialOptions.VisualStudioTenantId = appSettings.LocalEnvironmentTenantId;
                                 //You can also specify the user to use locally
                                 //credentialOptions.SharedTokenCacheUsername = "";
                             }
